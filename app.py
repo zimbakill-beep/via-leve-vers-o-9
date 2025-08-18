@@ -76,7 +76,14 @@ def recomendar_plano(a:Dict[str,Any])->str:
     return "receita"
 
 STEP_NAMES=["Sobre você","Sua saúde","Condições importantes","Medicações & alergias","Histórico & objetivo","Revisar & confirmar","Escolha do plano","Preferência de medicação","Resumo & pagamento"]
-def crumbs(): st.markdown("<div class='crumbs'>"+ "".join([f"<span class='crumb {'active' if i==st.session_state.step else ''}'>{i+1}. {n}</span>\" for i,n in enumerate(STEP_NAMES)]) +"</div>", unsafe_allow_html=True)
+def crumbs():
+    # monta a trilha de etapas (pílulas), marcando a etapa ativa
+    partes = []
+    for i, nome in enumerate(STEP_NAMES):
+        active = "active" if i == st.session_state.step else ""
+        partes.append(f"<span class='crumb {active}'>{i+1}. {nome}</span>")
+    html = "<div class='crumbs'>" + "".join(partes) + "</div>"
+    st.markdown(html, unsafe_allow_html=True)
 
 def norm_orgao(v:str)->str:
     m={"Está normal":"normal","Normal":"normal","normal":"normal","Leve":"leve","leve":"leve","Moderada":"moderada","moderada":"moderada","Grave":"grave","grave":"grave","Não sei informar":"desconhecido","não sei informar":"desconhecido"}
