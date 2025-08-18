@@ -1,5 +1,9 @@
-# ViaLeve — Pré-elegibilidade (v0.9)
-Implementa o Questionário ViaLeve v1.0 (Marketing).
-- Texto de abertura, barra de progresso nomeada, revisão final
-- Campos atualizados e regras clínicas internas
-- Botão de agendamento via `VIALEVE_SCHED_URL` e WhatsApp opcional `VIALEVE_WHATSAPP_URL`
+# ViaLeve — Pré-elegibilidade + Fase 2 (v0.11)
+
+Inclui:
+- Tela de **Planos** (Receita, Entrega, Acompanhamento, Premium) com recomendação automática.
+- Etapa de **preferência de medicação** (Semaglutida/Tirzepatida) quando aplicável.
+- **Resumo + consentimentos + preço** + botão de checkout (linkado por env `VIALEVE_CHECKOUT_URL`).
+- Fallback de **tabela de preços** local (editável no `app.py`).
+
+Deploy: suba estes arquivos no GitHub e aponte o Streamlit Cloud para `app.py`.
