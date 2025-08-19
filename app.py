@@ -285,7 +285,7 @@ if st.session_state.step == 0:
             else:
                 dia_default, mes_default, ano_default = 1, 1, 1990
 
-            st.markdown("**Preencha sua data de nascimento** nos campos abaixo.")
+            st.markdown("**Qual a sua data de nascimento**")
             c1, c2, c3 = st.columns([1,1,2])
             dia = c1.selectbox("Dia ", list(range(1,32)), index=dia_default-1, placeholder="Selecione o dia")
             mes = c2.selectbox("Mês ", list(range(1,13)), index=mes_default-1, placeholder="Selecione o mês")
