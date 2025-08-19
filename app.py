@@ -443,6 +443,12 @@ elif st.session_state.step == 4:
             st.session_state.exclusion_reasons = reasons
             next_step()
 
+   colA = st.columns(1)
+        with colA:
+            b_back = st.form_submit_button("⬅️ Voltar", use_container_width=True)
+
+        if b_back: prev_step()
+
 # -------- Etapa 5 — Revisar & Confirmar (com consentimentos + botões Editar) --------
 elif st.session_state.step == 5:
     st.subheader("6) Revisar & confirmar ✅")
