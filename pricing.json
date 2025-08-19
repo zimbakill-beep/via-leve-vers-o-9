@@ -1,0 +1,20 @@
+{
+  "moeda": "BRL",
+  "versao": "2025-08-18-prototipo-json",
+  "planos": {
+    "receita": {
+      "preco_base": 24900
+    },
+    "entrega": {
+      "semaglutida": 129900,
+      "tirzepatida": 149900
+    },
+    "acompanhamento": {
+      "preco_base": 39900
+    },
+    "premium": {
+      "semaglutida": 169900,
+      "tirzepatida": 189900
+    }
+  }
+}
