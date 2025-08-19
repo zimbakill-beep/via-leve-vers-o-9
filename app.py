@@ -273,6 +273,7 @@ if st.session_state.step == 0:
         with col1:
             nome = st.text_input("Nome completo *", value=st.session_state.answers.get("nome", ""), placeholder="Seu nome e sobrenome")
             email = st.text_input("E-mail *", value=st.session_state.answers.get("email", ""), placeholder="voce@exemplo.com")
+            telefone = st.text_input("Telefone *", value=st.session_state.anwers.get("(ddd)telefone", ""), placeholder="(ddd)telefone")
         with col2:
             hoje = date.today()
             default_iso = st.session_state.answers.get("data_nascimento")
