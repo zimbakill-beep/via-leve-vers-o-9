@@ -529,21 +529,35 @@ def main():
 
     # -------- Etapa 4 --------
     elif st.session_state.step == 4:
-        st.subheader("5) Histórico e objetivo 🎯")
-        with st.form("step4"):
-            col1, col2 = st.columns(2)
-            with col1:
-                usou_antes = st.selectbox("Já usou medicação para emagrecer?", ["Não","Sim"], index=0 if st.session_state.answers.get("usou_antes","nao")=="nao" else 1)
-                quais = st.multiselect("Quais? (opcional)", options=["Semaglutida","Tirzepatida","Liraglutida","Orlistate","Bupropiona/Naltrexona","Outros"], default=st.session_state.answers.get("quais", []), placeholder="Selecione as opções")
-                efeitos = st.text_area("Teve algum efeito colateral? (opcional)", value=st.session_state.answers.get("efeitos",""))
-            with col2:
-                objetivo = st.selectbox("Qual seu objetivo principal?", ["Perda de peso","Controle de comorbidades","Manutenção do peso"], index=(["Perda de peso","Controle de comorbidades","Manutenção do peso"].index(st.session_state.answers.get("objetivo","Perda de peso")) if st.session_state.answers.get("objetivo") else 0))
-                gestao_expectativas = st.slider("Quão pronto(a) está para mudanças no dia a dia (0–10)?", 0, 10, value=st.session_state.answers.get("pronto_mudar", 6))
+    st.subheader("5) Histórico e objetivo 🎯")
+    with st.form("step4"):
+        col1, col2 = st.columns(2)
+        with col1:
+            usou_antes = st.selectbox("Já usou medicação para emagrecer?", ["Não","Sim"], index=0 if st.session_state.answers.get("usou_antes","nao")=="nao" else 1)
+            quais = st.multiselect("Quais? (opcional)", options=["Semaglutida","Tirzepatida","Liraglutida","Orlistate","Bupropiona/Naltrexona","Outros"], default=st.session_state.answers.get("quais", []), placeholder="Selecione as opções")
+            efeitos = st.text_area("Teve algum efeito colateral? (opcional)", value=st.session_state.answers.get("efeitos",""))
+        with col2:
+            objetivo = st.selectbox("Qual seu objetivo principal?", ["Perda de peso","Controle de comorbidades","Manutenção do peso"], index=(["Perda de peso","Controle de comorbidades","Manutenção do peso"].index(st.session_state.answers.get("objetivo","Perda de peso")) if st.session_state.answers.get("objetivo") else 0))
+            gestao_expectativas = st.slider("Quão pronto(a) está para mudanças no dia a dia (0–10)?", 0, 10, value=st.session_state.answers.get("pronto_mudar", 6))
 
-        st.session_state.answers.update({"usou_antes": ("sim" if usou_antes=="Sim" else "nao"), "quais": quais, "efeitos": efeitos, "objetivo": objetivo, "pronto_mudar": gestao_expectativas})
+        # Botões de ação DENTRO do form
+        colA, colB = st.columns(2)
+        with colA:
+            b_back = st.form_submit_button("⬅️ Voltar", use_container_width=True)
+        with colB:
+            b_cont = st.form_submit_button("Ver meu resultado ✅", use_container_width=True)
 
-        submitted = st.form_submit_button("Ver meu resultado ✅", use_container_width=True)
-        if submitted:
+        if b_back:
+            prev_step()
+
+        if b_cont:
+            st.session_state.answers.update({
+                "usou_antes": ("sim" if usou_antes=="Sim" else "nao"),
+                "quais": quais,
+                "efeitos": efeitos,
+                "objetivo": objetivo,
+                "pronto_mudar": gestao_expectativas
+            })
             try:
                 dob = date.fromisoformat(st.session_state.answers.get("data_nascimento"))
                 idade = calc_idade(dob)
@@ -560,7 +574,8 @@ def main():
             st.session_state.exclusion_reasons = reasons
             next_step()
 
-    # -------- Etapa 5 — Revisar & Confirmar --------
+# -------- Etapa 5 — Revisar & Confirmar
+ --------
     elif st.session_state.step == 5:
         st.subheader("6) Revisar & confirmar ✅")
 
