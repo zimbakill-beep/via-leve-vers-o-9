@@ -105,7 +105,8 @@ def calc_idade(d: Optional[date]) -> Optional[int]:
     today = date.today()
     return today.year - d.year - ((today.month, today.day) < (d.month, d.day))
 
-# ======= Validações & helpers (1,2,5,6,7) =======
+# ======= Validações & helpers =======
+import re
 def is_valid_email(s: str) -> bool:
     if not s: return False
     return re.match(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", s.strip()) is not None
@@ -150,7 +151,7 @@ def build_resumo_md(a: Dict[str, Any]) -> str:
         f"- GI grave: {yesno(a.get('gi_grave'))}",
         f"- Gastroparesia: {yesno(a.get('gastroparesia'))}",
         f"- Pancreatite prévia: {yesno(a.get('pancreatite_previa'))}",
-        f"- Tireoide (MTC/MEN2): {yesno(a.get('historico_mtc_men2'))}",
+        f"- Câncer de tireoide (histórico pessoal/familiar): {yesno(a.get('historico_mtc_men2'))}",
         f"- Colecistite 12m: {yesno(a.get('colecistite_12m'))}",
         f"- Rins: {a.get('insuf_renal','—')} | Fígado: {a.get('insuf_hepatica','—')}",
         f"- Transtorno alimentar: {yesno(a.get('transtorno_alimentar'))}",
@@ -229,10 +230,10 @@ def evaluate_rules(a: Dict[str, Any]) -> Tuple[str, List[str]]:
 
     return ("excluido" if exclusion else "potencialmente_elegivel"), exclusion
 
-# ================= Preços (fallback local + pricing.json externo) =================
+# ================= Preços =================
 PRICING_FALLBACK = {
     "moeda": "BRL",
-    "versao": "2025-08-18-prototipo",
+    "versao": "2025-08-19-prototipo",
     "planos": {
         "receita": { "preco_base": 24900 },
         "entrega": { "semaglutida": 129900, "tirzepatida": 149900 },
@@ -273,7 +274,7 @@ def preco_plano(plano: str, med_pref: Optional[str] = None) -> Optional[int]:
         return planos.get(plano, {}).get(med_pref)
     return None
 
-# ================= Recomendação de plano =================
+# ================= Recomendação =================
 def recomendar_plano(a: Dict[str, Any]) -> str:
     pronto = int(a.get("pronto_mudar", 0) or 0)
     comorb = (a.get("tem_comorbidades") == "sim")
@@ -311,6 +312,7 @@ def crumbs():
     for i, nome in enumerate(STEP_NAMES):
         cls = "crumb " + ("active" if i == st.session_state.step else "")
         partes.append(f"<span class='{cls}'>{i+1}. {nome}</span>")
+        # build budget-conscious html
     html = "<div class='crumbs'>" + "".join(partes) + "</div>"
     st.markdown(html, unsafe_allow_html=True)
 
@@ -325,12 +327,10 @@ def main():
     init_state()
     st.markdown(f"<div class='logo-wrap'>{LOGO_SVG}</div>", unsafe_allow_html=True)
 
-    # Rolagem para o topo após navegação
     if st.session_state.get("_scroll_to_top"):
         st.markdown("<a href='#top'></a>", unsafe_allow_html=True)
         st.session_state["_scroll_to_top"] = False
 
-    # Seção "Como funciona" fixa
     st.markdown(
         """
     <div id="como-funciona" class="card">
@@ -458,7 +458,8 @@ def main():
                 gastroparesia = st.selectbox("Diagnóstico de gastroparesia (esvaziamento gástrico lento)?", ["Não","Sim"], index=0 if st.session_state.answers.get("gastroparesia","nao")=="nao" else 1)
             with col2:
                 pancreatite_previa = st.selectbox("Já teve pancreatite?", ["Não","Sim"], index=0 if st.session_state.answers.get("pancreatite_previa","nao")=="nao" else 1)
-                historico_mtc_men2 = st.selectbox("História pessoal/familiar de carcinoma medular de tireoide (MTC/MEN2)?", ["Não","Sim"], index=0 if st.session_state.answers.get("historico_mtc_men2","nao")=="nao" else 1)
+                # Rótulo ajustado conforme solicitação
+                historico_mtc_men2 = st.selectbox("História pessoal ou familiar de câncer de tireoide?", ["Não","Sim"], index=0 if st.session_state.answers.get("historico_mtc_men2","nao")=="nao" else 1)
                 colecistite_12m = st.selectbox("Cólica de vesícula/colecistite nos últimos 12 meses?", ["Não","Sim"], index=0 if st.session_state.answers.get("colecistite_12m","nao")=="nao" else 1)
                 outras_contra = st.text_area("Outras condições clínicas relevantes? (opcional)", value=st.session_state.answers.get("outras_contra",""))
 
@@ -539,28 +540,27 @@ def main():
                 objetivo = st.selectbox("Qual seu objetivo principal?", ["Perda de peso","Controle de comorbidades","Manutenção do peso"], index=(["Perda de peso","Controle de comorbidades","Manutenção do peso"].index(st.session_state.answers.get("objetivo","Perda de peso")) if st.session_state.answers.get("objetivo") else 0))
                 gestao_expectativas = st.slider("Quão pronto(a) está para mudanças no dia a dia (0–10)?", 0, 10, value=st.session_state.answers.get("pronto_mudar", 6))
 
-            st.session_state.answers.update({"usou_antes": ("sim" if usou_antes=="Sim" else "nao"), "quais": quais, "efeitos": efeitos, "objetivo": objetivo, "pronto_mudar": gestao_expectativas})
+        st.session_state.answers.update({"usou_antes": ("sim" if usou_antes=="Sim" else "nao"), "quais": quais, "efeitos": efeitos, "objetivo": objetivo, "pronto_mudar": gestao_expectativas})
 
-            submitted = st.form_submit_button("Ver meu resultado ✅", use_container_width=True)
-            if submitted:
-                # Bloqueio extra: idade válida
-                try:
-                    dob = date.fromisoformat(st.session_state.answers.get("data_nascimento"))
-                    idade = calc_idade(dob)
-                    if not idade or idade < 0:
-                        st.error("Data de nascimento inválida. Volte e corrija na etapa 1.")
-                        st.stop()
-                    st.session_state.answers["idade"] = idade
-                    st.session_state.answers["idade_calculada"] = idade
-                except:
+        submitted = st.form_submit_button("Ver meu resultado ✅", use_container_width=True)
+        if submitted:
+            try:
+                dob = date.fromisoformat(st.session_state.answers.get("data_nascimento"))
+                idade = calc_idade(dob)
+                if not idade or idade < 0:
                     st.error("Data de nascimento inválida. Volte e corrija na etapa 1.")
                     st.stop()
-                status, reasons = evaluate_rules(st.session_state.answers)
-                st.session_state.eligibility = status
-                st.session_state.exclusion_reasons = reasons
-                next_step()
+                st.session_state.answers["idade"] = idade
+                st.session_state.answers["idade_calculada"] = idade
+            except:
+                st.error("Data de nascimento inválida. Volte e corrija na etapa 1.")
+                st.stop()
+            status, reasons = evaluate_rules(st.session_state.answers)
+            st.session_state.eligibility = status
+            st.session_state.exclusion_reasons = reasons
+            next_step()
 
-    # -------- Etapa 5 — Revisar & Confirmar (com consentimentos + botões Editar) --------
+    # -------- Etapa 5 — Revisar & Confirmar --------
     elif st.session_state.step == 5:
         st.subheader("6) Revisar & confirmar ✅")
 
@@ -605,7 +605,7 @@ def main():
                 st.write(f"- GI grave ativa: {yesno(a.get('gi_grave'))}")
                 st.write(f"- Gastroparesia: {yesno(a.get('gastroparesia'))}")
                 st.write(f"- Pancreatite prévia: {yesno(a.get('pancreatite_previa'))}")
-                st.write(f"- Tireoide (MTC/MEN2): {yesno(a.get('historico_mtc_men2'))}")
+                st.write(f"- Câncer de tireoide (histórico pessoal/familiar): {yesno(a.get('historico_mtc_men2'))}")
                 st.write(f"- Colecistite 12m: {yesno(a.get('colecistite_12m'))}")
                 st.write(f"- Rins: {a.get('insuf_renal','—')} | Fígado: {a.get('insuf_hepatica','—')}")
                 st.write(f"- Transtorno alimentar: {yesno(a.get('transtorno_alimentar'))}")
@@ -636,7 +636,7 @@ def main():
                 st.markdown("""
 **Termo de Consentimento Informado e Autorização de Teleconsulta (ViaLeve)**
 
-1. **O que é isso?** Este fluxo é **pré-triagem** e **não** substitui consulta médica.
+1. **O que é isso?** Este fluxo é o mesmo de uma **consulta médica**, para avaliar a possibilidade de uso das medicações.
 2. **Riscos e benefícios:** todo tratamento pode ter efeitos (náuseas, dor abdominal, cálculos na vesícula, pancreatite etc.). A indicação é **individual** e feita pelo médico.
 3. **Alternativas:** mudanças de estilo de vida, plano nutricional, atividade física e, quando indicado, procedimentos cirúrgicos.
 4. **Privacidade (LGPD):** autorizo o uso dos meus dados **somente** para este serviço, com segurança e possibilidade de revogar o consentimento.
@@ -645,7 +645,6 @@ def main():
 7. **Assinatura eletrônica:** meu aceite eletrônico tem validade jurídica.
                 """)
 
-            # Validação na submissão + resumo em Markdown
             with st.form("consent_step6"):
                 c1, c2 = st.columns(2)
                 with c1:
@@ -726,7 +725,7 @@ def main():
         if st.button("⬅️ Voltar", use_container_width=True):
             prev_step()
 
-    # -------- Etapa 7 — Preferência de medicação (somente Entrega/Premium) --------
+    # -------- Etapa 7 — Preferência de medicação --------
     elif st.session_state.step == 7:
         plano = st.session_state.answers.get("plano")
         if plano not in ["entrega","premium"]:
@@ -737,6 +736,22 @@ def main():
                            ["Semaglutida", "Tirzepatida"], horizontal=True, index=(0 if st.session_state.answers.get("med_pref","semaglutida")=="semaglutida" else 1))
             med_pref = "semaglutida" if med == "Semaglutida" else "tirzepatida"
             st.session_state.answers["med_pref"] = med_pref
+
+            # Explicação clínica breve (solicitado)
+            with st.expander("Sobre as opções (resultados e expectativas)", expanded=True):
+                st.markdown("""
+**Semaglutida (classe GLP-1):**
+- Em estudos clínicos, perdas **médias** costumam ficar em torno de **10–15%** do peso corporal em 12–18 meses.
+- Pode ajudar no **controle de glicose**, **pressão arterial**, **lipídios** e **apneia do sono** quando presentes.
+- A **dose é escalonada** e ajustada pelo médico conforme sua tolerância e resposta.
+
+**Tirzepatida (GIP/GLP-1):**
+- Em estudos, reduções **médias** frequentemente chegam a **15–22%** do peso corporal.
+- Excelente impacto no **controle glicêmico** e em **comorbidades metabólicas**.
+- **Dose escalonada** com ajustes médicos.
+
+> **Importante:** os resultados variam entre pessoas e dependem de **adesão**, **dose**, **plano nutricional** e **exercícios**. Seu médico definirá a melhor estratégia para o seu caso.
+                """)
 
             valor = preco_plano(plano, med_pref)
             st.info(f"Valor estimado/mês para **{med}** no plano **{plano.title()}**: **{centavos_to_brl(valor)}**")
@@ -806,7 +821,7 @@ def main():
                 })
 
     st.markdown("---")
-    st.caption("ViaLeve • Protótipo v0.11.5 — PT-BR • Streamlit (Python)")
+    st.caption("ViaLeve • Protótipo v0.11.6 — PT-BR • Streamlit (Python)")
 
 if __name__ == "__main__":
     main()

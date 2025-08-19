@@ -1,6 +1,6 @@
 {
   "moeda": "BRL",
-  "versao": "2025-08-18-prototipo-json",
+  "versao": "2025-08-19-prototipo-json",
   "planos": {
     "receita": {
       "preco_base": 24900
