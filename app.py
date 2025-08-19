@@ -133,7 +133,7 @@ def evaluate_rules(a: Dict[str, Any]) -> Tuple[str, List[str]]:
     if g("amamentando") == "sim": exclusion.append("Amamentação em curso.")
     if g("tratamento_cancer") == "sim": exclusion.append("Tratamento oncológico ativo.")
     if g("pancreatite_previa") == "sim": exclusion.append("História de pancreatite prévia.")
-    if g("historico_mtc_men2") == "sim": exclusion.append("História pessoal/familiar de carcinoma medular de tireoide (MTC) ou MEN2.")
+    if g("historico_mtc_men2") == "sim": exclusion.append("História pessoal ou familiar de cancer de tireoide.")
     if g("alergia_glp1") == "sim": exclusion.append("Hipersensibilidade conhecida a análogos de GLP-1.")
     if g("alergias_componentes"):
         if g("alergias_componentes") != ["Não tenho alergia a esses componentes"]:
@@ -352,7 +352,7 @@ elif st.session_state.step == 2:
             gastroparesia = st.selectbox("Diagnóstico de gastroparesia (esvaziamento gástrico lento)?", ["Não","Sim"], index=0 if st.session_state.answers.get("gastroparesia","nao")=="nao" else 1)
         with col2:
             pancreatite_previa = st.selectbox("Já teve pancreatite?", ["Não","Sim"], index=0 if st.session_state.answers.get("pancreatite_previa","nao")=="nao" else 1)
-            historico_mtc_men2 = st.selectbox("História pessoal/familiar de carcinoma medular de tireoide (MTC) ou MEN2?", ["Não","Sim"], index=0 if st.session_state.answers.get("historico_mtc_men2","nao")=="nao" else 1)
+            historico_mtc_men2 = st.selectbox("História pessoal ou familiar de cancer de tireoide?", ["Não","Sim"], index=0 if st.session_state.answers.get("historico_mtc_men2","nao")=="nao" else 1)
             colecistite_12m = st.selectbox("Cólica de vesícula/colecistite nos últimos 12 meses?", ["Não","Sim"], index=0 if st.session_state.answers.get("colecistite_12m","nao")=="nao" else 1)
             outras_contra = st.text_area("Outras condições clínicas relevantes? (opcional)", value=st.session_state.answers.get("outras_contra",""))
 
