@@ -484,11 +484,11 @@ elif st.session_state.step == 5:
             st.write(f"- Gravidez: {yesno(a.get('gravidez'))}")
             st.write(f"- Amamentando: {yesno(a.get('amamentando'))}")
             st.write(f"- Tratamento oncológico ativo: {yesno(a.get('tratamento_cancer'))}")
-            st.write(f"- GI grave ativa: {yesno(a.get('gi_grave'))}")
+            st.write(f"- Problema Gastrico grave ativa: {yesno(a.get('gi_grave'))}")
             st.write(f"- Gastroparesia: {yesno(a.get('gastroparesia'))}")
             st.write(f"- Pancreatite prévia: {yesno(a.get('pancreatite_previa'))}")
-            st.write(f"- MTC/MEN2: {yesno(a.get('historico_mtc_men2'))}")
-            st.write(f"- Colecistite 12m: {yesno(a.get('colecistite_12m'))}")
+            st.write(f"- Tumor de tireoide: {yesno(a.get('historico_mtc_men2'))}")
+            st.write(f"- Inflamação da vesicula 12m: {yesno(a.get('colecistite_12m'))}")
             st.write(f"- Rins: {a.get('insuf_renal','—')} | Fígado: {a.get('insuf_hepatica','—')}")
             st.write(f"- Transtorno alimentar: {yesno(a.get('transtorno_alimentar'))}")
             st.write(f"- Corticoide crônico: {yesno(a.get('uso_corticoide'))}")
@@ -518,7 +518,7 @@ elif st.session_state.step == 5:
             st.markdown("""
 **Termo de Consentimento Informado e Autorização de Teleconsulta (ViaLeve)**
 
-1. **O que é isso?** Este fluxo é **pré-triagem** e **não** substitui consulta médica.
+1. **O que é isso?** Este fluxo é o mesmo de uma consulta médica, para avaliar a possibilidade de uso das medicações.
 2. **Riscos e benefícios:** todo tratamento pode ter efeitos (náuseas, dor abdominal, cálculos na vesícula, pancreatite etc.). A indicação é **individual** e feita pelo médico.
 3. **Alternativas:** mudanças de estilo de vida, plano nutricional, atividade física e, quando indicado, procedimentos cirúrgicos.
 4. **Privacidade (LGPD):** autorizo o uso dos meus dados **somente** para este serviço, com segurança e possibilidade de revogar o consentimento.
